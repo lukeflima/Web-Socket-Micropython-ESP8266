@@ -110,39 +110,40 @@ def send_msg(msg):
             print("[!] Extended payload length", ext_payload_length)
         print("[!] Msg", msg)
 
-addr = socket.getaddrinfo('0.0.0.0', 8080)[0][-1]
+def start():
+    addr = socket.getaddrinfo('0.0.0.0', 8080)[0][-1]
 
-s = socket.socket()
-s.bind(addr)
-s.listen(1)
+    s = socket.socket()
+    s.bind(addr)
+    s.listen(1)
 
-print('[+] Listening on', addr)
+    print('[+] Listening on', addr)
 
-pin = machine.Pin(2, machine.Pin.OUT)
-pin.on()
+    pin = machine.Pin(2, machine.Pin.OUT)
+    pin.on()
 
-while True:
-    cl, addr = s.accept()
-    print('[!] Client connected from', addr)
-    cl_file = server_handshake()
     while True:
-        payload = recv_msg()
+        cl, addr = s.accept()
+        print('[!] Client connected from', addr)
+        cl_file = server_handshake()
+        while True:
+            payload = recv_msg()
 
-        if payload == 'toggle-led':
-            if DEBUG:
+            if payload == 'toggle-led':
+                if DEBUG:
+                    if pin.value():
+                        print("Truning off led")
+                    else:
+                        print("Truning on led")
+
+                pin.value(not pin.value())
                 if pin.value():
-                    print("Truning off led")
+                    send_msg("OFF")
                 else:
-                    print("Truning on led")
-
-            pin.value(not pin.value())
-            if pin.value():
-                send_msg("OFF")
-            else:
-                send_msg("ON")
-        elif payload == 'is-led-on':
-            send_msg("OFF" if pin.value() else "ON")
-        elif payload == "":
-            print("[!] Closing connection from", addr)
-            break
-    cl.close()
+                    send_msg("ON")
+            elif payload == 'is-led-on':
+                send_msg("OFF" if pin.value() else "ON")
+            elif payload == "":
+                print("[!] Closing connection from", addr)
+                break
+        cl.close()
