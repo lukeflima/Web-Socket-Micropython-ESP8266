@@ -1,4 +1,4 @@
-# Web-Socket-Micropython-ESP8266
+# Web Socket Micropython ESP8266
 
 ### An atempt to use websocket on ESP8266 using MicroPython.
 
